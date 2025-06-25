@@ -7,7 +7,12 @@ from agents.resume_fit_agent import resume_fit_tool
 from langchain.agents import initialize_agent, AgentType
 from services.session_store import get_session
 from agents.interview_agent import interview_question_tool
+from services.db import init_db
+from services.db import save_session
 
+MAX_QUESTIONS = 3
+
+init_db()
 app = FastAPI()
 
 # Configure CORS middleware
@@ -98,8 +103,18 @@ async def submit_answer_api(
     try:
         session = get_session(user_id)
         session.submit_answer(answer)
-        next_q = session.generate_question()
 
+        if len(session.asked_questions) >= MAX_QUESTIONS:
+            # ✅ Interview done, save to DB
+            save_session(session)
+            return JSONResponse(content={
+                "status": "completed",
+                "message": "Interview completed. Session saved.",
+                "question_count": len(session.asked_questions)
+            })
+
+        # Otherwise continue
+        next_q = session.generate_question()
         return JSONResponse(content={
             "next_question": next_q,
             "question_count": len(session.asked_questions)
