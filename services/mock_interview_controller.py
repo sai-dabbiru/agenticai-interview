@@ -14,6 +14,7 @@ class MockInterviewSession:
         self.asked_questions = []
         self.answers = []
         self.current_question = None
+        self.is_saved = False
 
     def should_start_interview(self):
         return self.resume_score is not None and self.resume_score >= 70

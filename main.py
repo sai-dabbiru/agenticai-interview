@@ -137,12 +137,19 @@ async def feedback_summary(user_id: str):
         session = get_session(user_id)
         total_score, feedback = session.evaluate_all_answers()
 
+        # 🧠 Persist with feedback
+        if not session.is_saved:
+            from services.db import save_session
+            save_session(session)
+            session.is_saved = True 
+
         return JSONResponse(content={
             "user_id": user_id,
             "total_score": total_score,
             "average_score": round(total_score / len(feedback), 2) if feedback else 0,
             "individual_feedback": feedback
         })
+
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
 
