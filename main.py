@@ -98,7 +98,7 @@ async def submit_answer_api(
     try:
         session = get_session(user_id)
         session.submit_answer(answer)
-        next_q = session.generate_next_question()
+        next_q = session.generate_question()
 
         return JSONResponse(content={
             "next_question": next_q,
