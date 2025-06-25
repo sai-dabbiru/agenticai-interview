@@ -129,7 +129,7 @@ async def submit_answer_api(
             })
 
         # Else — generate next question
-        next_q = session.generate_next_question()
+        next_q = session.generate_question()
 
         return JSONResponse(content={
             "status": "in_progress",
