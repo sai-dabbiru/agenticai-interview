@@ -9,6 +9,8 @@ from services.session_store import get_session
 from agents.interview_agent import interview_question_tool
 from services.db import init_db
 from services.db import save_session
+from agents.feedback_agent import evaluate_answer
+from agents.progress_tracker import generate_progress_feedback
 
 MAX_QUESTIONS = 3
 
@@ -92,8 +94,7 @@ async def get_mock_question(
         return JSONResponse(content={"question": response})
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
-
-
+    
 
 @app.post("/agent/submit_answer")
 async def submit_answer_api(
@@ -104,23 +105,67 @@ async def submit_answer_api(
         session = get_session(user_id)
         session.submit_answer(answer)
 
+        # Set how many questions you want per mock interview
+        MAX_QUESTIONS = 5
+
         if len(session.asked_questions) >= MAX_QUESTIONS:
-            # ✅ Interview done, save to DB
+            # Step 1: Evaluate feedback
+          
+            total_score, feedback = session.evaluate_all_answers()
+            session.feedback = feedback
+
+            # Step 2: Save session with feedback
             save_session(session)
+
+            # Step 3: Generate progress insight
+            progress = generate_progress_feedback(user_id, session.role)
+
             return JSONResponse(content={
                 "status": "completed",
-                "message": "Interview completed. Session saved.",
-                "question_count": len(session.asked_questions)
+                "total_score": total_score,
+                "average_score": round(total_score / len(feedback), 2),
+                "individual_feedback": feedback,
+                "progress_feedback": progress
             })
 
-        # Otherwise continue
-        next_q = session.generate_question()
+        # Else — generate next question
+        next_q = session.generate_next_question()
+
         return JSONResponse(content={
+            "status": "in_progress",
             "next_question": next_q,
             "question_count": len(session.asked_questions)
         })
+
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
+
+# @app.post("/agent/submit_answer")
+# async def submit_answer_api(
+#     user_id: str = Form(...),
+#     answer: str = Form(...)
+# ):
+#     try:
+#         session = get_session(user_id)
+#         session.submit_answer(answer)
+
+#         if len(session.asked_questions) >= MAX_QUESTIONS:
+#             # ✅ Interview done, save to DB
+#             save_session(session)
+#             return JSONResponse(content={
+#                 "status": "completed",
+#                 "message": "Interview completed. Session saved.",
+#                 "question_count": len(session.asked_questions)
+#             })
+
+#         # Otherwise continue
+#         next_q = session.generate_question()
+#         return JSONResponse(content={
+#             "next_question": next_q,
+#             "question_count": len(session.asked_questions)
+#         })
+#     except Exception as e:
+#         return JSONResponse(status_code=500, content={"error": str(e)})
 
 
 @app.get("/agent/history")
@@ -153,3 +198,11 @@ async def feedback_summary(user_id: str):
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
 
+
+@app.get("/agent/progress")
+async def progress_api(user_id: str, role: str):
+    try:
+        insight = generate_progress_feedback(user_id, role)
+        return JSONResponse(content={"progress_feedback": insight})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
