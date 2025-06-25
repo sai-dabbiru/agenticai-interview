@@ -1,7 +1,8 @@
 # services/mock_interview_controller.py
 
 from agents.resume_fit_agent import resume_fit_tool
-from agents.interview_agent import interview_question_tool  # For Iteration 2
+from agents.interview_agent import interview_question_tool 
+from agents.feedback_agent import evaluate_answer
 
 class MockInterviewSession:
     def __init__(self, user_id):
@@ -59,3 +60,14 @@ class MockInterviewSession:
             "question": self.current_question,
             "answer": answer
         })
+
+    def evaluate_all_answers(self):
+        self.feedback = []
+        total_score = 0
+        for pair in self.answers:
+            q = pair["question"]
+            a = pair["answer"]
+            result = evaluate_answer(q, a)
+            self.feedback.append(result)
+            total_score += result.get("score", 0)
+        return total_score, self.feedback

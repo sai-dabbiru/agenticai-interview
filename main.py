@@ -130,3 +130,19 @@ async def get_user_history(user_id: str):
         "questions": session.asked_questions,
         "answers": session.answers
     })
+
+@app.get("/agent/feedback_summary")
+async def feedback_summary(user_id: str):
+    try:
+        session = get_session(user_id)
+        total_score, feedback = session.evaluate_all_answers()
+
+        return JSONResponse(content={
+            "user_id": user_id,
+            "total_score": total_score,
+            "average_score": round(total_score / len(feedback), 2) if feedback else 0,
+            "individual_feedback": feedback
+        })
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
