@@ -105,9 +105,6 @@ async def submit_answer_api(
         session = get_session(user_id)
         session.submit_answer(answer)
 
-        # Set how many questions you want per mock interview
-        MAX_QUESTIONS = 5
-
         if len(session.asked_questions) >= MAX_QUESTIONS:
             # Step 1: Evaluate feedback
           
