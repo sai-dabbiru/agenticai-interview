@@ -3,6 +3,8 @@
 from agents.resume_fit_agent import resume_fit_tool
 from agents.interview_agent import interview_question_tool 
 from agents.feedback_agent import evaluate_answer
+from tools.vectorstore import load_interview_vectorstore
+from agents.domain_classifier import classify_role_to_domain
 
 class MockInterviewSession:
     def __init__(self, user_id):
@@ -38,21 +40,30 @@ class MockInterviewSession:
             match = re.search(r"[Ss]core\s*[:\-]?\s*(\d+)", result)
             return int(match.group(1)) if match else 0
     
+    # def generate_question(self):
+
+    #     domain = classify_role_to_domain(self.role)
+    #     vectorstore = load_interview_vectorstore()
+
+    #     results = vectorstore.similarity_search_with_score(domain, k=5)
+
+    #     for doc, score in results:
+    #         q = doc.page_content
+    #         if q not in self.asked_questions:
+    #             self.asked_questions.append(q)
+    #             self.current_question = q
+    #             return q
+
+    #     return "No more questions available for your role."
+
     def generate_question(self):
-        from tools.vectorstore import load_interview_vectorstore
-        from agents.domain_classifier import classify_role_to_domain
+        input_str = f"{self.role}|{self.experience}"
+        question = interview_question_tool.run(input_str)
 
-        domain = classify_role_to_domain(self.role)
-        vectorstore = load_interview_vectorstore()
-
-        results = vectorstore.similarity_search_with_score(domain, k=5)
-
-        for doc, score in results:
-            q = doc.page_content
-            if q not in self.asked_questions:
-                self.asked_questions.append(q)
-                self.current_question = q
-                return q
+        if question not in self.asked_questions and "No suitable interview question" not in question:
+            self.asked_questions.append(question)
+            self.current_question = question
+            return question
 
         return "No more questions available for your role."
 
