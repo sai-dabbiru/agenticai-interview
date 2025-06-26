@@ -184,6 +184,7 @@ async def progress_api(user_id: str, role: str):
 async def classify_and_route(user_id: str = Form(...), query: str = Form(...)):
 
     intent = classify_user_intent(query)
+    print(f"Classified intent: {intent}")
 
     if intent == "interview":
         return JSONResponse(content={
