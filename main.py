@@ -192,6 +192,7 @@ async def classify_and_route(user_id: str = Form(...), query: str = Form(...)):
         })
 
     elif intent == "reflect":
+        print("Reflecting on past performance...")
         return JSONResponse(content={
             "action": "reflect"
         })
@@ -202,6 +203,7 @@ async def classify_and_route(user_id: str = Form(...), query: str = Form(...)):
         })
 
     else:
+        print("Unknown intent, unable to route.")
         return JSONResponse(content={
         "action": "unknown"
     })
