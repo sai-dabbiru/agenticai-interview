@@ -9,3 +9,7 @@ dotenv
 python-multipart
 tiktoken
 faiss-cpu
+langchain-mcp-adapters
+langgraph
+langchain-openai 
+langchain-core
