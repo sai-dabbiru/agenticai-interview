@@ -14,18 +14,18 @@ rag_prompt = ChatPromptTemplate.from_template(rag_template)
 def generate_interview_question(input_str: str) -> str:
     role, experience = input_str.split("|")
     vectorstore = load_interview_vectorstore()
-
     domain = classify_role_to_domain(role)
-    
-    # Use the domain as a search query
+
     results = vectorstore.similarity_search_with_score(domain, k=5)
 
-    # Pick the best matching question from the same domain
-    for doc, score in results:
-        if doc.metadata.get("domain") == domain:
-            return doc.page_content  # ✅ Direct match from RAG
+    # Define a similarity threshold (lower score = better match in most vector DBs)
+    SIMILARITY_THRESHOLD = 0.7  # Adjust based on embedding backend
 
-    return "No suitable question found for the selected role."
+    for doc, score in results:
+        if doc.metadata.get("domain") == domain and score < SIMILARITY_THRESHOLD:
+            return doc.page_content
+
+    return f"No suitable interview question found for the domain: {domain}."
 
 interview_question_tool = Tool(
     name="InterviewQuestionGenerator",
