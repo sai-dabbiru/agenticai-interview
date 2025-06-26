@@ -73,12 +73,16 @@ async def evaluate_resume_api(
             "feedback": feedback,
         }
 
-        # 🚀 Automatically fetch first interview question if eligible
         if session.should_start_interview():
-            result["next_step"] = "interview"
-            result["question"] = session.generate_question()
+            question = session.generate_question()
+            if "No more questions available" in question or "No suitable interview question" in question:
+                result["next_step"] = "retry"
+                result["message"] = question  
+            else:
+                result["next_step"] = "interview"
+                result["question"] = question
         else:
-            result["next_step"] = "retry"  # or "improve resume"
+            result["next_step"] = "retry"  
 
         return JSONResponse(content=result)
 
