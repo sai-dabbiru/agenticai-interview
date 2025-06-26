@@ -5,6 +5,7 @@ from agents.interview_agent import interview_question_tool
 from agents.feedback_agent import evaluate_answer
 from tools.vectorstore import load_interview_vectorstore
 from agents.domain_classifier import classify_role_to_domain
+from agents.interview_agent import generate_interview_question
 
 class MockInterviewSession:
     def __init__(self, user_id):
@@ -59,7 +60,7 @@ class MockInterviewSession:
     def generate_question(self):
         input_str = f"{self.role}|{self.experience}"
         print("[DEBUG] Already asked questions:", self.asked_questions)
-        question = interview_question_tool.run(input_str,already_asked=self.asked_questions)
+        question = generate_interview_question(input_str,already_asked=self.asked_questions)
         print("[DEBUG] Agent Generated question:", question)
 
         if question not in self.asked_questions and "No suitable interview question" not in question:
