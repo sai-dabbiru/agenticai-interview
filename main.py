@@ -11,6 +11,7 @@ from services.db import init_db
 from services.db import save_session
 from agents.feedback_agent import evaluate_answer
 from agents.progress_tracker import generate_progress_feedback
+from agents.classifier_agent import classify_user_intent
 
 MAX_QUESTIONS = 3
 
@@ -137,32 +138,6 @@ async def submit_answer_api(
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
 
-# @app.post("/agent/submit_answer")
-# async def submit_answer_api(
-#     user_id: str = Form(...),
-#     answer: str = Form(...)
-# ):
-#     try:
-#         session = get_session(user_id)
-#         session.submit_answer(answer)
-
-#         if len(session.asked_questions) >= MAX_QUESTIONS:
-#             # ✅ Interview done, save to DB
-#             save_session(session)
-#             return JSONResponse(content={
-#                 "status": "completed",
-#                 "message": "Interview completed. Session saved.",
-#                 "question_count": len(session.asked_questions)
-#             })
-
-#         # Otherwise continue
-#         next_q = session.generate_question()
-#         return JSONResponse(content={
-#             "next_question": next_q,
-#             "question_count": len(session.asked_questions)
-#         })
-#     except Exception as e:
-#         return JSONResponse(status_code=500, content={"error": str(e)})
 
 
 @app.get("/agent/history")
@@ -203,3 +178,35 @@ async def progress_api(user_id: str, role: str):
         return JSONResponse(content={"progress_feedback": insight})
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
+    
+
+@app.post("/agent/classify_and_route")
+async def classify_and_route(user_id: str = Form(...), query: str = Form(...)):
+
+    intent = classify_user_intent(query)
+
+    if intent == "interview":
+        # Start/resume interview
+        session = get_session(user_id)
+        next_q = session.generate_question()
+        return JSONResponse(content={
+            "action": "interview",
+            "message": "Starting mock interview.",
+            "question": next_q
+        })
+
+    elif intent == "reflect":
+        # Show feedback and progress
+        from agents.progress_tracker import generate_progress_feedback
+        insight = generate_progress_feedback(user_id, role="devops")  # or fetch stored role
+
+        return JSONResponse(content={
+            "action": "reflect",
+            "message": "Here is your performance insight.",
+            "progress_feedback": insight
+        })
+
+    return JSONResponse(content={
+        "action": "unknown",
+        "message": "Sorry, I couldn't determine what you want to do."
+    })
