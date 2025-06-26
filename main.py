@@ -186,27 +186,20 @@ async def classify_and_route(user_id: str = Form(...), query: str = Form(...)):
     intent = classify_user_intent(query)
 
     if intent == "interview":
-        # Start/resume interview
-        session = get_session(user_id)
-        next_q = session.generate_question()
         return JSONResponse(content={
-            "action": "interview",
-            "message": "Starting mock interview.",
-            "question": next_q
+            "action": "interview"
         })
 
     elif intent == "reflect":
-        # Show feedback and progress
-        from agents.progress_tracker import generate_progress_feedback
-        insight = generate_progress_feedback(user_id, role="devops")  # or fetch stored role
-
         return JSONResponse(content={
-            "action": "reflect",
-            "message": "Here is your performance insight.",
-            "progress_feedback": insight
+            "action": "reflect"
+        })
+    
+    elif intent == "admin":
+        return JSONResponse(content={
+            "action": "admin"
         })
 
     return JSONResponse(content={
-        "action": "unknown",
-        "message": "Sorry, I couldn't determine what you want to do."
+        "action": "unknown"
     })
