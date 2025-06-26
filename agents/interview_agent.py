@@ -4,7 +4,7 @@ from langchain.tools import Tool
 from tools.vectorstore import load_interview_vectorstore
 from agents.domain_classifier import classify_role_to_domain
 
-chat_llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.4)
+chat_llm = ChatOpenAI(model="gpt-4", temperature=0.4)
 
 with open("prompts/rag_prompt.txt", "r") as f:
     rag_template = f.read()
