@@ -63,6 +63,7 @@ class MockInterviewSession:
         if question not in self.asked_questions and "No suitable interview question" not in question:
             self.asked_questions.append(question)
             self.current_question = question
+            print("[DEBUG] Controller Generated question:", question)
             return question
 
         return "No more questions available for your role."
