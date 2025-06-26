@@ -199,10 +199,6 @@ async def classify_and_route(user_id: str = Form(...), query: str = Form(...)):
             "action": "reflect"
         })
     
-    elif intent == "admin":
-        return JSONResponse(content={
-            "action": "admin"
-        })
 
     else:
         return JSONResponse(content={

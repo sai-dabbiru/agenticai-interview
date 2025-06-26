@@ -10,8 +10,8 @@ User message: "{query}"
 
 Choose one of these categories:
 - "interview": user wants to start or continue a mock interview
-- "reflect": user wants to analyze past performance, understand weaknesses, get skill improvement tips, receive feedback, or review their progress
-- "admin" : user wants to access leaderboard , stats , or other administrative tasks                                                  
+- "reflect": user wants to analyze past performance, understand weaknesses, get skill improvement tips, receive feedback, or review their progress,access leaderboard , stats
+                                                
 
 Respond with just the category name.
 """)
