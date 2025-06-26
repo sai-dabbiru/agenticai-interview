@@ -58,6 +58,7 @@ class MockInterviewSession:
 
     def generate_question(self):
         input_str = f"{self.role}|{self.experience}"
+        print("[DEBUG] Already asked questions:", self.asked_questions)
         question = interview_question_tool.run(input_str,already_asked=self.asked_questions)
         print("[DEBUG] Agent Generated question:", question)
 
