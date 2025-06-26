@@ -52,7 +52,8 @@ rag_prompt = ChatPromptTemplate.from_template(rag_template)
 
 def generate_interview_question(input_str: str, already_asked: list[str] = None) -> str:
     already_asked = already_asked or []
-
+    print(already_asked)
+    
     role, experience = input_str.split("|")
     vectorstore = load_interview_vectorstore()
     domain = classify_role_to_domain(role).strip().lower()
