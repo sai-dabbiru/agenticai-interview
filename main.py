@@ -12,8 +12,11 @@ from services.db import save_session
 from agents.feedback_agent import evaluate_answer
 from agents.progress_tracker import generate_progress_feedback
 from agents.classifier_agent import classify_user_intent
+from agents.admin_agent import get_admin_agent
+from langchain_core.messages import HumanMessage
 
 MAX_QUESTIONS = 3
+admin_agent = get_admin_agent()
 
 init_db()
 app = FastAPI()
@@ -192,7 +195,6 @@ async def classify_and_route(user_id: str = Form(...), query: str = Form(...)):
         })
 
     elif intent == "reflect":
-        print("Reflecting on past performance...")
         return JSONResponse(content={
             "action": "reflect"
         })
@@ -203,7 +205,16 @@ async def classify_and_route(user_id: str = Form(...), query: str = Form(...)):
         })
 
     else:
-        print("Unknown intent, unable to route.")
         return JSONResponse(content={
         "action": "unknown"
     })
+
+
+@app.post("/agent/admin_query")
+async def admin_query(query: str = Form(...)):
+    try:
+        result = await admin_agent.ainvoke({"messages": [HumanMessage(content=query)]})
+        final_response = result["messages"][-1].content
+        return JSONResponse(content={"response": final_response})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
