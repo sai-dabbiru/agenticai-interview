@@ -200,6 +200,7 @@ async def classify_and_route(user_id: str = Form(...), query: str = Form(...)):
             "action": "admin"
         })
 
-    return JSONResponse(content={
+    else:
+        return JSONResponse(content={
         "action": "unknown"
     })
