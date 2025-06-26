@@ -59,6 +59,7 @@ class MockInterviewSession:
     def generate_question(self):
         input_str = f"{self.role}|{self.experience}"
         question = interview_question_tool.run(input_str)
+        print("[DEBUG] Agent Generated question:", question)
 
         if question not in self.asked_questions and "No suitable interview question" not in question:
             self.asked_questions.append(question)
