@@ -131,6 +131,7 @@ async def submit_answer_api(
 
         # ✅ If this was the last question
         if len(session.asked_questions) >= MAX_QUESTIONS:
+            print(f"Session for user {user_id} completed with {len(session.asked_questions)} questions.")
             # Save full session (questions, answers, feedback)
             save_session(session)
 
@@ -144,6 +145,7 @@ async def submit_answer_api(
             })
 
         # ✅ Else generate the next question
+        print(f"Session for user {user_id} ongoing with {len(session.asked_questions)} questions.")
         next_q = session.generate_question()
 
         return JSONResponse(content={
