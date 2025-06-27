@@ -10,6 +10,7 @@ Resume:
 
 Target Role: {target_role}
 Experience: {experience}
+Required Skills : {skills}
 
 Format:
 Score: <number>

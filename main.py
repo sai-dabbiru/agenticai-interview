@@ -51,6 +51,7 @@ async def evaluate_resume_api(
     user_id: str = Form(...),
     target_role: str = Form(...),
     experience: str = Form(...),
+    skills: str = Form(...),
     resume: UploadFile = Form(...)
 ):
     try:
@@ -64,7 +65,7 @@ async def evaluate_resume_api(
             f.write(await resume.read())
 
         session = get_session(user_id)
-        score, feedback = session.process_resume(file_path, target_role, experience)
+        score, feedback = session.process_resume(file_path, target_role, experience,skills)
 
         result = {
             "user_id": user_id,

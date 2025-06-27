@@ -13,14 +13,14 @@ prompt = ChatPromptTemplate.from_template(prompt_template)
 
 def run_resume_fit(input_str: str) -> str:
     # input_str format: "path|role|experience"
-    path, role, exp = input_str.split("|")
+    path, role, exp ,skills = input_str.split("|")
     resume_text = load_resume_text(path)
-    messages = prompt.format_messages(resume=resume_text, target_role=role, experience=exp)
+    messages = prompt.format_messages(resume=resume_text, target_role=role, experience=exp, skills=skills)
     response = chat_llm(messages)
     return response.content
 
 resume_fit_tool = Tool(
     name="ResumeFitEvaluator",
     func=run_resume_fit,
-    description="Evaluates a resume (input: 'path|role|experience') and returns fit score + feedback."
+    description="Evaluates a resume (input: 'path|role|experience|skills') and returns fit score + feedback."
 )

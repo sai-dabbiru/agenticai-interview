@@ -23,10 +23,11 @@ class MockInterviewSession:
         return self.resume_score is not None and self.resume_score >= 70
 
 
-    def process_resume(self, resume_path, role, experience):
+    def process_resume(self, resume_path, role, experience,skills):
         self.role = role
         self.experience = experience
-        result = resume_fit_tool.run(f"{resume_path}|{role}|{experience}")
+        self.skills = skills
+        result = resume_fit_tool.run(f"{resume_path}|{role}|{experience}|{skills}")
         self.resume_score = self._extract_score(result)
         self.feedback = result
         return self.resume_score, self.feedback
@@ -41,21 +42,6 @@ class MockInterviewSession:
             match = re.search(r"[Ss]core\s*[:\-]?\s*(\d+)", result)
             return int(match.group(1)) if match else 0
     
-    # def generate_question(self):
-
-    #     domain = classify_role_to_domain(self.role)
-    #     vectorstore = load_interview_vectorstore()
-
-    #     results = vectorstore.similarity_search_with_score(domain, k=5)
-
-    #     for doc, score in results:
-    #         q = doc.page_content
-    #         if q not in self.asked_questions:
-    #             self.asked_questions.append(q)
-    #             self.current_question = q
-    #             return q
-
-    #     return "No more questions available for your role."
 
     def generate_question(self):
         input_str = f"{self.role}|{self.experience}"
