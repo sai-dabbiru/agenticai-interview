@@ -112,36 +112,51 @@ async def submit_answer_api(
 ):
     try:
         session = get_session(user_id)
+
+        # Get current question (just asked) to pair with answer
+        current_question = session.asked_questions[-1] if session.asked_questions else "Unknown"
+
+        # Submit the answer to session
         session.submit_answer(answer)
 
-        if len(session.asked_questions) >= MAX_QUESTIONS:
-            # Step 1: Evaluate feedback
-          
-            total_score, feedback = session.evaluate_all_answers()
-            session.feedback = feedback
+        # 💬 Step 1: Evaluate *this* answer immediately
+        from agents.feedback_agent import evaluate_answer
+        single_feedback = evaluate_answer(current_question, answer)
 
-            # Step 2: Save session with feedback
+        # Add feedback to session feedback list (maintain full history)
+        session.feedback = session.feedback if hasattr(session, "feedback") else []
+        session.feedback.append(single_feedback)
+
+        # 📌 If interview is complete, generate summary + progress
+        if len(session.asked_questions) >= MAX_QUESTIONS:
+            from services.db import save_session
+            from agents.progress_tracker import generate_progress_feedback
+
+            # Save the session
             save_session(session)
 
-            # Step 3: Generate progress insight
+            # Generate progress insight
             progress = generate_progress_feedback(user_id, session.role)
 
             return JSONResponse(content={
                 "status": "completed",
-                "total_score": total_score,
-                "average_score": round(total_score / len(feedback), 2),
-                "individual_feedback": feedback,
+                "individual_feedback": single_feedback,
                 "progress_feedback": progress
             })
 
-        # Else — generate next question
+        # 🎯 Else — continue with next question
         next_q = session.generate_question()
 
         return JSONResponse(content={
             "status": "in_progress",
             "next_question": next_q,
+            "individual_feedback": single_feedback,
             "question_count": len(session.asked_questions)
         })
+
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
 
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
