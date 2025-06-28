@@ -12,10 +12,10 @@ Answer: {answer}
 
 Respond with a JSON object having:
 - score: (integer 0-5)
-- feedback: (short, constructive comment)
+- feedback: (short, constructive and what could be done better to improve)
 
 Example:
-{{"score": 4, "feedback": "Good explanation with real-world example."}}
+{{"score": 4, "feedback": "good explanation but could improve on technical details which would be needed for client facing roles."}}
 
 Only output the JSON.
 """)
